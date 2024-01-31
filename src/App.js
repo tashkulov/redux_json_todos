@@ -3,16 +3,15 @@ import axios from 'axios';
 
 import { useDispatch, useSelector } from 'react-redux';
 import Button from './button';
-import {addCustomerAction, addManyCustomerAction, removeCustomerAction} from './store/customerReducer';
-
+import {addCustomerAction, addManyCustomerAction, removeCustomerAction,editCustomerAction} from './store/customerReducer';
 function App() {
     const dispatch = useDispatch();
     const customers = useSelector(state => state.customers.customers);
 
-
-    const addCustomer = name => {
+    const addCustomer = (name, number) => {
         const customer = {
             name,
+            number,
             id: Date.now()
         };
         dispatch(addCustomerAction(customer));
@@ -21,24 +20,24 @@ function App() {
     const removeCustomer = customer => {
         dispatch(removeCustomerAction(customer.id));
     };
+
     const fetchCustomersFromDatabase = async () => {
         try {
             const response = await axios.get('https://jsonplaceholder.typicode.com/users');
             dispatch(addManyCustomerAction(response.data));
         } catch (error) {
-            alert("error")
+            alert("error");
         }
     };
 
-
-
-
+    const editCustomer = (id, newName, newNumber) => {
+        dispatch(editCustomerAction({ id, name: newName, number: newNumber }));
+    };
 
     return (
         <div className="App">
-
-            <div style={{display: 'flex'}}>
-                <Button onClick={() => addCustomer(prompt())}>Добавить клиента</Button>
+            <div style={{ display: 'flex' }}>
+                <Button onClick={() => addCustomer(prompt('Enter name'), prompt('Enter number'))}>Добавить контакт</Button>
                 <button
                     style={{
                         padding: '12px 24px',
@@ -53,15 +52,15 @@ function App() {
                     }}
                     onClick={() => fetchCustomersFromDatabase()}
                 >
-                    Получить клиентов из бд
+                    Получить Контакты из бд
                 </button>
             </div>
 
             {customers.length > 0 ? (
-                <div style={{cursor: 'pointer'}}>
+                <div style={{ cursor: 'pointer' }}>
                     {customers.map(customer => (
                         <div
-                            key={customer.id}  onClick={() => removeCustomer(customer)}
+                            key={customer.id}
                             style={{
                                 fontSize: '2rem',
                                 border: '1px solid black',
@@ -73,13 +72,40 @@ function App() {
                                 marginBottom: '10px'
                             }}
                         >
-                            {customer.name}{' '}
+                            {customer.name} - {customer.number}{' '}
+                            <button
+                                style={{
+                                    fontSize: '2rem',
+                                    border: '1px solid black',
+                                    backgroundColor: '#3498db',
 
+                                    padding: '10px',
+                                    marginTop: 5,
+                                    width: 'fit-content',
+                                    borderRadius: '5px',
+                                    margin: '0 auto',
+                                    marginBottom: '10px'
+                                }}
+                                onClick={() => removeCustomer(customer)}>DELETE</button>
+                            <button
+                                style={{
+                                    fontSize: '2rem',
+                                    border: '1px solid black',
+                                    backgroundColor: '#3498db',
+
+                                    padding: '10px',
+                                    marginTop: 5,
+                                    width: 'fit-content',
+                                    borderRadius: '5px',
+                                    margin: '0 auto',
+                                    marginBottom: '10px'
+                                }}
+                                onClick={() => editCustomer(customer.id, prompt('Enter new name'), prompt('Enter new number'))}>EDIT</button>
                         </div>
                     ))}
                 </div>
             ) : (
-                <div style={{fontSize: '2rem', marginTop: 20}}>Клиенты отсутствуют!</div>
+                <div style={{ fontSize: '2rem', marginTop: 20 }}>Контакты отсутствуют!</div>
             )}
         </div>
     );
